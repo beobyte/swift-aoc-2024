@@ -1,4 +1,5 @@
 import Algorithms
+import Foundation
 
 struct Day01: AdventDay {
     // Save your data in a corresponding text file in the `Data` directory.
@@ -28,7 +29,14 @@ struct Day01: AdventDay {
     
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        // Sum the maximum entries in each set of data
-        entities.map { $0.max() ?? 0 }.reduce(0, +)
+        var columnLeft: [Int] = []
+        let columnRight: NSCountedSet = []
+        entities.forEach { pair in
+            columnLeft.append(pair[0])
+            columnRight.add(pair[1])
+        }
+        return columnLeft.reduce(0) { partialResult, val in
+            partialResult + val * columnRight.count(for: val)
+        }
     }
 }
