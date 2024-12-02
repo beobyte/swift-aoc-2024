@@ -19,8 +19,7 @@ struct Day02: AdventDay {
     
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        // Sum the maximum entries in each set of data
-        entities.map { $0.max() ?? 0 }.reduce(0, +)
+        entities.filter({ isValidUnsafeReport($0) }).count
     }
     
     func isValidReport(_ report: [Int]) -> Bool {
@@ -44,6 +43,22 @@ struct Day02: AdventDay {
         }
         
         return true
+    }
+    
+    func isValidUnsafeReport(_ report: [Int]) -> Bool {
+        guard !isValidReport(report) else { 
+            return true
+        }
+        
+        for i in 0..<report.count {
+            var shortReport = report
+            shortReport.remove(at: i)
+            if isValidReport(shortReport) {
+                return true
+            }
+        }
+        
+        return false
     }
     
     func compareInts(_ a: Int, _ b: Int) -> ComparisonResult {
