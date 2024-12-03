@@ -6,50 +6,62 @@ struct Day03: AdventDay {
     var data: String
     
     // Splits input data into its component parts and convert from string.
-    var entities: [(Int, Int)] {
+    var entities: [(a: Int, b: Int, skip: Bool)] {
         let intRef = Reference(Int.self)
         
         let pattern = Regex {
-            "mul("
-            Capture(as: intRef) {
+            ChoiceOf {
+                "don't()"
+                "do()"
                 Regex {
-                    ("0"..."9")
-                    Optionally(("0"..."9"))
-                    Optionally(("0"..."9"))
+                    "mul("
+                    Capture(as: intRef) {
+                        Regex {
+                            ("0"..."9")
+                            Optionally(("0"..."9"))
+                            Optionally(("0"..."9"))
+                        }
+                    } transform: { intRef in
+                        Int(intRef) ?? 0
+                    }
+                    ","
+                    Capture(as: intRef) {
+                        Regex {
+                            ("0"..."9")
+                            Optionally(("0"..."9"))
+                            Optionally(("0"..."9"))
+                        }
+                    } transform: { intRef in
+                        Int(intRef) ?? 0
+                    }
+                    ")"
                 }
-            } transform: { intRef in
-                Int(intRef) ?? 0
             }
-            ","
-            Capture(as: intRef) {
-                Regex {
-                    ("0"..."9")
-                    Optionally(("0"..."9"))
-                    Optionally(("0"..."9"))
-                }
-            } transform: { intRef in
-                Int(intRef) ?? 0
-            }
-            ")"
         }.anchorsMatchLineEndings()
         
-        return data.matches(of: pattern).map { match in
-            let (_, num1, num2) = match.output
-            return (num1, num2)
+        var skip = false
+        return data.matches(of: pattern).compactMap { match in
+            print(match.output)
+            let (substring, num1, num2) = match.output
+            if substring.hasPrefix("do") {
+                skip = substring.hasPrefix("don")
+            }
+            guard let num1, let num2 else { return nil }
+            return (num1, num2, skip)
         }
     }
     
     // Replace this with your solution for the first part of the day's challenge.
     func part1() -> Any {
-        // Calculate the sum of the first set of input data
-        return entities.reduce(0) { partialResult, pair in
-            partialResult + pair.0 * pair.1
+        return entities.reduce(0) { partialResult, entity in
+            partialResult + entity.a * entity.b
         }
     }
     
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        // Sum the maximum entries in each set of data
-        0
+        return entities.reduce(0) { partialResult, entity in
+            partialResult + (entity.skip ? 0 : (entity.a * entity.b))
+        }
     }
 }
