@@ -11,37 +11,51 @@ struct Day04: AdventDay {
     
     // Replace this with your solution for the first part of the day's challenge.
     func part1() -> Any {
-        return search(word: ["X", "M", "A", "S"], in: entities)
+        return search(word: ["X", "M", "A", "S"], in: entities).count
     }
     
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        0
+        let aLetters = search(word: ["M", "A", "S"], in: entities)
+            .filter({ w in
+                // skip horizontal and vertical words
+                w[0].0 != w[1].0 && w[0].1 != w[1].1
+            })
+            .map({ w in
+                // get only A letters coordinates hash
+                var hasher = Hasher()
+                hasher.combine(w[1].0)
+                hasher.combine(w[1].1)
+                return hasher.finalize()
+            })
+        return aLetters.count - Set(aLetters).count
     }
     
-    func search(word: [Character], in text: [[Character]]) -> Int {
+    func search(word: [Character], in text: [[Character]]) -> [[(Int, Int)]] {
         let m = text.count;
         let n = text[0].count;
         
-        var count = 0
+        var result = [[(Int, Int)]]()
         
         for i in 0..<m {
             for j in 0..<n {
-                count += search(word: word, in: text, row: i, col: j)
+                result.append(contentsOf: search(word: word, in: text, row: i, col: j))
             }
         }
         
-        return count
+        return result
     }
     
-    func search(word: [Character], in text: [[Character]], row: Int, col: Int) -> Int {
+    func search(word: [Character], in text: [[Character]], row: Int, col: Int) -> [[(Int, Int)]] {
         let m = text.count;
         let n = text[0].count;
     
         var count = 0
         if text[row][col] != word[0] {
-            return 0
+            return []
         }
+        
+        var result = [[(Int, Int)]]()
 
         let x = [-1, -1, -1, 0, 0, 1, 1, 1]
         let y = [-1, 0, 1, -1, 1, -1, 0, 1]
@@ -49,6 +63,7 @@ struct Day04: AdventDay {
         for i in 0..<x.count {
             var curX = row + x[i]
             var curY = col + y[i]
+            var wordPoints = [(row, col)]
             
             var k = 1
             
@@ -61,16 +76,19 @@ struct Day04: AdventDay {
                     break
                 }
                 
+                wordPoints.append((curX, curY))
+                
                 curX += x[i]
                 curY += y[i]
                 k += 1
             }
             
             if k == word.count {
+                result.append(wordPoints)
                 count += 1
             }
         }
         
-        return count
+        return result
     }
 }
