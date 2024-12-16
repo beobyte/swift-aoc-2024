@@ -18,25 +18,44 @@ struct Day07: AdventDay {
     
     func part1() -> Any {
         entities.reduce(into: 0) { partialResult, pair in
-            partialResult += canCombine(values: pair.value, for: pair.key) ? pair.key : 0
+            partialResult += canCombine(values: pair.value, for: pair.key, respectConcatOperator: false) ? pair.key : 0
         }
     }
     
     func part2() -> Any {
-        0
+        entities.reduce(into: 0) { partialResult, pair in
+            partialResult += canCombine(values: pair.value, for: pair.key, respectConcatOperator: true) ? pair.key : 0
+        }
     }
     
-    func canCombine(values: [Int], for result: Int) -> Bool {
+    func canCombine(values: [Int], for result: Int, respectConcatOperator: Bool) -> Bool {
         guard values.count > 2 else {
             return values[0] + values[1] == result
             || values[0] * values[1] == result
+            || (respectConcatOperator && Int("\(values[0])\(values[1])")! == result)
         }
         
-        if canCombine(values: [values[0] + values[1]] + Array(values[2...]), for: result) {
+        if canCombine(
+            values: [values[0] + values[1]] + Array(values[2...]), 
+            for: result,
+            respectConcatOperator: respectConcatOperator
+        ) {
             return true
         }
         
-        if canCombine(values: [values[0] * values[1]] + Array(values[2...]), for: result) {
+        if canCombine(
+            values: [values[0] * values[1]] + Array(values[2...]),
+            for: result,
+            respectConcatOperator: respectConcatOperator
+        ) {
+            return true
+        }
+        
+        if respectConcatOperator && canCombine(
+            values: [Int("\(values[0])\(values[1])")!] + Array(values[2...]),
+            for: result,
+            respectConcatOperator: respectConcatOperator
+        ) {
             return true
         }
         
