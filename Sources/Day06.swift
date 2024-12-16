@@ -47,15 +47,52 @@ struct Day06: AdventDay {
     }
     
     func part2() -> Any {
-        0
+        let grid = data.split(separator: "\n").map(String.init)
+        let guardPoint = locations(of: "^", in: grid)[0]
+        let availablePathPointsCount = locations(of: ".", in: grid).count
+        var loopObstructionCount = 0
+        
+        for i in 0..<grid.count {
+            for j in 0..<grid[i].count {
+                autoreleasepool {
+                    var line = Array(grid[i])
+                    if line[j] == "." {
+                        line[j] = "#"
+                        
+                        var gridCopy = grid
+                        gridCopy[i] = String(line)
+                        
+                        var paths = [Point]()
+                        paths.append(guardPoint)
+                        var direction: Direction = .up
+                        
+                        var shouldStop = false
+                        var path = move(to: direction, from: guardPoint, in: gridCopy, shouldStop: &shouldStop)
+                        while shouldStop == false, paths.count <= availablePathPointsCount - 1 {
+                            paths.append(contentsOf: path)
+                            direction = direction.next()
+                            path = move(to: direction, from: paths.last!, in: gridCopy, shouldStop: &shouldStop)
+                        }
+                        paths.append(contentsOf: path)
+                        
+                        if paths.count > availablePathPointsCount - 1 {
+                            loopObstructionCount += 1
+                        }
+                    }
+                }
+            }
+        }
+        
+        return loopObstructionCount
     }
     
-    func locations(of substring: String, in grid: [String]) -> [Point] {
+    func locations(of character: Character, in grid: [String]) -> [Point] {
         var locations: [Point] = []
         for (i, line) in grid.enumerated() {
-            let location = (line as NSString).range(of: substring)
-            if location.location != NSNotFound {
-                locations.append(Point(x: location.location, y: i))
+            for (j, char) in line.enumerated() {
+                if char == character {
+                    locations.append(Point(x: j, y: i))
+                }
             }
         }
         return locations
